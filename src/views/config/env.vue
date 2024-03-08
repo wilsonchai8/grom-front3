@@ -94,6 +94,11 @@
             component: NInput,
           },
           {
+            label: '备注',
+            key: 'comment',
+            component: NInput,
+          },
+          {
             label: '通知地址',
             key: 'notification',
             component: NInput,
@@ -132,6 +137,10 @@
           {
             title: '前缀',
             key: 'prefix',
+          },
+          {
+            title: '备注',
+            key: 'comment',
           },
           {
             title: '通知地址',
