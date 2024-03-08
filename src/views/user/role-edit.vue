@@ -330,7 +330,9 @@
           }
         })
       }
-      function cancelClick() {}
+      function cancelClick() {
+        router.push('/user/role-list')
+      }
       function handleBack() {
         router.back()
       }
