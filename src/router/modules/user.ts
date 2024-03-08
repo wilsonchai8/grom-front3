@@ -34,13 +34,6 @@ const user_routes = [
         hidden: true,
         permission: 1,
       },
-      {
-        parentPath: '/user',
-        menuUrl: '/user/test',
-        menuName: '测试',
-        icon: 'detail',
-        hidden: true,
-      },
     ],
   },
 ]
