@@ -134,29 +134,28 @@
         }
       }
       function getRequests() {
-        const metaRequests = import.meta.glob('@/api/modules/*.ts')
+        const metaRequests = import.meta.glob('@/api/modules/*.ts', { eager: true })
         for (const key in metaRequests) {
-          metaRequests[key]().then((mod: any) => {
-            const request_temp: any = {
-              label: mod.comment,
-              key: mod.comment,
-              parent: true,
-              children: [],
-            }
-            Object.keys(mod.req).forEach((k: any) => {
-              if (mod.req[k].permission == 1) {
-                const key = mod.req[k].url + ':' + mod.req[k].method
-                request_temp.children.push({
-                  label: mod.req[k].comment,
-                  key: key,
-                  total: mod.req[k],
-                })
-              }
-            })
-            if (request_temp.children.length > 0) {
-              requestData.value.push(request_temp)
+          const mod = metaRequests[key] as any
+          const request_temp: any = {
+            label: mod.comment,
+            key: mod.comment,
+            parent: true,
+            children: [],
+          }
+          Object.keys(mod.req).forEach((k: any) => {
+            if (mod.req[k].permission == 1) {
+              const key = mod.req[k].url + ':' + mod.req[k].method
+              request_temp.children.push({
+                label: mod.req[k].comment,
+                key: key,
+                total: mod.req[k],
+              })
             }
           })
+          if (request_temp.children.length > 0) {
+            requestData.value.push(request_temp)
+          }
         }
       }
       function getComponents() {
