@@ -216,7 +216,7 @@
         const { node, action } = meta
         if (node.parent) {
           related_data = node.children.map((item: any) => {
-            return item.total.related_request
+            return item.total
           })
         } else {
           if (node.total.related_request) {
