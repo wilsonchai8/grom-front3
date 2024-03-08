@@ -7,7 +7,6 @@
             <img src="../../assets/logo.png" />
           </div>
           <div class="flex-1 flex justify-center items-center ttppii"> GROM </div>
-          <div class="flex-1 flex justify-center items-center ttppii"> 你好，世界 </div>
         </div>
       </div>
       <div class="right">

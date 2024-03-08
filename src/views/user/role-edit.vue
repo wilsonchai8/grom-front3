@@ -95,7 +95,8 @@
             rule: {
               required: true,
               trigger: ['blur', 'input'],
-              message: '请输入角色名',
+              message: '字符、数字、-_组成',
+              pattern: /^[A-Za-z0-9-_]*$/,
             },
             component: NInput,
           },
