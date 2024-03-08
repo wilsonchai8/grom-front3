@@ -56,7 +56,7 @@
 
 <script lang="ts">
   import { componentPermissionFun } from '@/utils/common'
-  import userRq from '@/api/modules/user'
+  import userRq from '@/api/modules/4_user'
   import { renderTag } from '@/hooks/form'
   import {
     usePagination,

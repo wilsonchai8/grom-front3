@@ -61,7 +61,7 @@
 <script lang="ts">
   import publicDetail from './publicInfo.vue'
   import { componentPermissionFun } from '@/utils/common'
-  import publicRq from '@/api/modules/public'
+  import publicRq from '@/api/modules/2_public'
   import relatedGeneral from './relatedGeneral.vue'
   import { Search as SearchIcon } from '@vicons/ionicons5'
   import {

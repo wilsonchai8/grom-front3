@@ -119,7 +119,7 @@
   import { onMounted, computed, defineComponent, nextTick, ref, watchEffect } from 'vue'
   import { drag, unDrag } from '@/hooks/useDialogDragger'
   import { useMessage, NInput, NSelect, NTag } from 'naive-ui'
-  import configRq from '@/api/modules/config'
+  import configRq from '@/api/modules/1_config'
   import _ from 'lodash'
 
   export default defineComponent({

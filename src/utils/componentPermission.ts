@@ -83,27 +83,6 @@ export default [
         ]
     },
     {
-        name: 'role-list',
-        comment: '角色列表',
-        children: [
-            {
-                name: 'role_add_but',
-                comment: '添加角色按钮',
-                related_request: '/admin/user/roles:post',
-            },
-            {
-                name: 'role_edit_but',
-                comment: '编辑角色按钮',
-                related_request: '/admin/user/roles:put',
-            },
-            {
-                name: 'role_delete_but',
-                comment: '删除角色按钮',
-                related_request: '/admin/user/roles:delete',
-            },
-        ]
-    },
-    {
         name: 'user-list',
         comment: '用户列表',
         children: [
@@ -121,6 +100,27 @@ export default [
                 name: 'user_enable_disable_but',
                 comment: '启用/禁用用户按钮',
                 related_request: '/admin/user/users:delete',
+            },
+        ]
+    },
+    {
+        name: 'role-list',
+        comment: '角色列表',
+        children: [
+            {
+                name: 'role_add_but',
+                comment: '添加角色按钮',
+                related_request: '/admin/user/roles:post',
+            },
+            {
+                name: 'role_edit_but',
+                comment: '编辑角色按钮',
+                related_request: '/admin/user/roles:put',
+            },
+            {
+                name: 'role_delete_but',
+                comment: '删除角色按钮',
+                related_request: '/admin/user/roles:delete',
             },
         ]
     },

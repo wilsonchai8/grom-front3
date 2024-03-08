@@ -119,7 +119,7 @@
   import { useTable, useTableHeight } from '@/hooks/table'
   import useUserInfoStore from '@/store/modules/user-info'
   import permissionStore from '@/store/modules/permission'
-  import userRq from '@/api/modules/user'
+  import userRq from '@/api/modules/4_user'
   import { useRouter } from 'vue-router'
   import { random } from 'lodash-es'
   import md5 from 'js-md5'

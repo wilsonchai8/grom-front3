@@ -46,7 +46,7 @@
 
 <script lang="ts">
   import { componentPermissionFun } from '@/utils/common'
-  import envRq from '@/api/modules/env'
+  import envRq from '@/api/modules/3_env'
   import { renderTag } from '@/hooks/form'
   import {
     usePagination,

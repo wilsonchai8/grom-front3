@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts">
-  import tokenRq from '@/api/modules/token'
+  import tokenRq from '@/api/modules/6_token'
   import {
     usePagination,
     useRowKey,

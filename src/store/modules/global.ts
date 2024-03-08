@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import userRq from '@/api/modules/user'
-import roleRq from '@/api/modules/role'
-import envRq from '@/api/modules/env'
-import configRq from '@/api/modules/config'
+import userRq from '@/api/modules/4_user'
+import roleRq from '@/api/modules/5_role'
+import envRq from '@/api/modules/3_env'
+import configRq from '@/api/modules/1_config'
 
 const globalStore = defineStore('global-info', {
     state: () => {

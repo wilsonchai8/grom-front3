@@ -83,7 +83,7 @@
   import { renderTag } from '@/hooks/form'
   import configPublish from './publish.vue'
   import fuzzySearchComponent from './fuzzySearch.vue'
-  import configRq from '@/api/modules/config'
+  import configRq from '@/api/modules/1_config'
   import { Search as SearchIcon } from '@vicons/ionicons5'
   import {
     usePagination,

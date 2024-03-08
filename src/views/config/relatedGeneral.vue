@@ -59,7 +59,7 @@
     useDialog,
     DataTableColumn,
   } from 'naive-ui'
-  import publicRq from '@/api/modules/public'
+  import publicRq from '@/api/modules/2_public'
   import _ from 'lodash'
   import {
     usePagination,

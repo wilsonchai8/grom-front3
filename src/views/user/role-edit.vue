@@ -68,7 +68,7 @@
   import { defineComponent, ref, computed, onMounted, h } from 'vue'
   import { useMessage, TreeOption, NInput, useDialog } from 'naive-ui'
   import { useRouter, useRoute } from 'vue-router'
-  import roleRq from '@/api/modules/role'
+  import roleRq from '@/api/modules/5_role'
   import metaComponents from '@/utils/componentPermission'
 
   export default defineComponent({

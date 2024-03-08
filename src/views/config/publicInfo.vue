@@ -56,7 +56,7 @@
   import { onMounted, computed, defineComponent, nextTick, ref, watchEffect, watch } from 'vue'
   import { drag, unDrag } from '@/hooks/useDialogDragger'
   import { useMessage, NInput, NSelect, NTag, useDialog } from 'naive-ui'
-  import publicRq from '@/api/modules/public'
+  import publicRq from '@/api/modules/2_public'
   import { Base64 } from 'js-base64'
   import _ from 'lodash'
 

@@ -46,7 +46,7 @@
   import configVersionInfo from './components/configDrawer.vue'
   import { onMounted, computed, defineComponent, nextTick, ref, watchEffect } from 'vue'
   import { useMessage, NInput, NSelect, NTag, useDialog, DataTableColumn } from 'naive-ui'
-  import configRq from '@/api/modules/config'
+  import configRq from '@/api/modules/1_config'
   import _ from 'lodash'
 
   import {

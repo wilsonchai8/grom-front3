@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import roleRq from '@/api/modules/role'
+import roleRq from '@/api/modules/5_role'
 import {
     usePagination,
     useRowKey,

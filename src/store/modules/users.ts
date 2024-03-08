@@ -1,8 +1,5 @@
 import { defineStore } from 'pinia'
-import { UserState } from '../types'
-import Cookies from 'js-cookie'
-import userRq from '@/api/modules/user'
-import roleRq from '@/api/modules/role'
+import roleRq from '@/api/modules/5_role'
 
 const useUsersStore = defineStore('users', {
     state: () => {
