@@ -41,7 +41,7 @@ const globalStore = defineStore('global-info', {
             const ret = [] as any
             state.env_list.forEach((item: any) => {
                 ret.push({
-                    label: item.name,
+                    label: item.comment,
                     value: item.id,
                     other: item,
                 })

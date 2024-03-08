@@ -37,7 +37,7 @@ export function rq(k: any, module: any, params = {}, data = {}) {
         })
       }
     } else if (error.status === 403) {
-      const error_message = '当前操作没有权限，请刷新后再试'
+      const error_message = '当前权限有变动，请刷新后再试'
       debounceMessage(error_message)
     } else {
       let error_message = error.status.toString() + ' ' + error.statusText

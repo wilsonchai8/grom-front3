@@ -58,7 +58,7 @@
     TableActionModel,
   } from '@/hooks/table'
   import { DataFormType, ModalDialogType } from '@/types/components'
-  import { DataTableColumn, NInput, NSelect, NSwitch, useDialog } from 'naive-ui'
+  import { DataTableColumn, NInput, NSwitch, useDialog, FormItemRule } from 'naive-ui'
   import { defineComponent, onMounted, ref, nextTick, computed } from 'vue'
   export default defineComponent({
     name: 'EnvList',
@@ -84,7 +84,8 @@
             rule: {
               required: true,
               trigger: ['blur', 'input'],
-              message: '请输入名称',
+              message: '字符、数字、-_组成',
+              pattern: /^[A-Za-z0-9-_]*$/,
             },
             component: NInput,
           },
@@ -92,6 +93,19 @@
             label: '前缀',
             key: 'prefix',
             component: NInput,
+            rule: {
+              required: true,
+              trigger: ['blur', 'input'],
+              message: '字符、数字、-_.组成',
+              pattern: /^$|^[A-Za-z0-9-_.]*$/,
+              validator(rule: FormItemRule, value: string) {
+                const { pattern } = rule
+                return pattern.test(value)
+              },
+            },
+            attribute: {
+              placeholder: '可以为空',
+            },
           },
           {
             label: '备注',

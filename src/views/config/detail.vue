@@ -190,6 +190,10 @@
             component: NSelect,
           },
           {
+            label: '环境名',
+            key: 'env',
+          },
+          {
             label: '前缀',
             key: 'prefix',
           },
@@ -367,12 +371,14 @@
         () => configInfoData.value.env_id,
         (newVal) => {
           if (newVal == null) {
+            configInfoData.value.env = ''
             configInfoData.value.prefix = ''
           } else {
             const targetEnv = useGlobal.envListSelect.find((item: any) => {
               return item.value == newVal
             })
             configInfoData.value.prefix = targetEnv.other.prefix
+            configInfoData.value.env = targetEnv.other.name
           }
         }
       )

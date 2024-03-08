@@ -237,10 +237,14 @@
           },
           {
             label: '环境',
+            key: 'comment',
+          },
+          {
+            label: '环境名称',
             key: 'env',
           },
           {
-            label: '前缀',
+            label: '环境前缀',
             key: 'prefix',
           },
         ]
@@ -309,7 +313,7 @@
               'generalRollback',
               {},
               {
-                id: configInfoData.value.id,
+                general_id: configInfoData.value.id,
                 version_id: newConfig.value.id,
               }
             )

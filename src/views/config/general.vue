@@ -138,12 +138,12 @@
             component: NInput,
           },
           {
-            label: '环境',
+            label: '环境名称',
             key: 'env',
             component: NInput,
           },
           {
-            label: '前缀',
+            label: '环境前缀',
             key: 'prefix',
             component: NInput,
           },
@@ -201,10 +201,14 @@
           },
           {
             title: '环境',
+            key: 'comment',
+          },
+          {
+            title: '环境名称',
             key: 'env',
           },
           {
-            title: '前缀',
+            title: '环境前缀',
             key: 'prefix',
           },
           {
