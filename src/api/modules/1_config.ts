@@ -46,11 +46,21 @@ export const req: any = {
     comment: '发布普通配置',
     permission: 1,
   },
+  generalPublishStop: {
+    url: '/config/general/publishstop',
+    method: 'post',
+    comment: '终止发布普通配置',
+  },
   generalRollback: {
     url: '/config/general/rollback',
     method: 'post',
     comment: '回滚普通配置',
     permission: 1,
+  },
+  generalRollbackStop: {
+    url: '/config/general/rollbackstop',
+    method: 'post',
+    comment: '终止回滚普通配置',
   },
   generalLogList: {
     url: '/config/generallog',

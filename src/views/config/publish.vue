@@ -58,24 +58,44 @@
         </n-space>
         <n-space style="float: right">
           <n-button :loading="loading" type="default" size="small" @click="onCancel">取消</n-button>
-          <n-button
-            v-if="publishType == 'publish'"
-            :loading="loading"
-            type="primary"
-            size="small"
-            :disabled="!statusCheck.canPublish(newConfig.status)"
-            @click="onPublishConfirm"
-            >发布</n-button
-          >
-          <n-button
-            v-else-if="publishType == 'rollback'"
-            :loading="loading"
-            type="warning"
-            size="small"
-            :disabled="!statusCheck.canRollback(newConfig.status)"
-            @click="onRollbackConfirm"
-            >回滚</n-button
-          >
+          <div v-if="publishType == 'publish'">
+            <n-button
+              :loading="loading"
+              type="primary"
+              size="small"
+              :disabled="!statusCheck.canPublish(newConfig.status)"
+              @click="onPublishConfirm"
+              >发布</n-button
+            >
+            <n-button
+              :loading="loading"
+              style="margin-left: 10px"
+              type="error"
+              size="small"
+              :disabled="!statusCheck.canPublishStop(newConfig.status)"
+              @click="onPublishRollbackStopConfirm"
+              >终止发布</n-button
+            >
+          </div>
+          <div v-else-if="publishType == 'rollback'">
+            <n-button
+              :loading="loading"
+              type="warning"
+              size="small"
+              :disabled="!statusCheck.canRollback(newConfig.status)"
+              @click="onRollbackConfirm"
+              >回滚</n-button
+            >
+            <n-button
+              :loading="loading"
+              style="margin-left: 10px"
+              type="error"
+              size="small"
+              :disabled="!statusCheck.canRollbackStop(newConfig.status)"
+              @click="onPublishRollbackStopConfirm"
+              >终止回滚</n-button
+            >
+          </div>
         </n-space>
       </div>
 
@@ -118,7 +138,7 @@
   import logDetailInfo from './components/configDrawer.vue'
   import { onMounted, computed, defineComponent, nextTick, ref, watchEffect } from 'vue'
   import { drag, unDrag } from '@/hooks/useDialogDragger'
-  import { useMessage, NInput, NSelect, NTag } from 'naive-ui'
+  import { useMessage, useDialog, NSelect, NTag } from 'naive-ui'
   import configRq from '@/api/modules/1_config'
   import _ from 'lodash'
 
@@ -156,6 +176,7 @@
       const header = ref<HTMLElement | null>()
       const editorRef = ref('')
       const configVersionLog = ref({})
+      const naiveDailog = useDialog()
       const segmented = {
         content: 'soft',
         footer: 'soft',
@@ -274,62 +295,118 @@
         showModal.value = false
         return Promise.resolve(false)
       }
-      function onPublishConfirm() {
-        configInfoRef.value.$refs.userdefineRef.validate((valid: any) => {
-          if (valid) {
-            return
-          } else {
-            loading.value = true
-            configRq(
-              'generalPublish',
-              {},
-              {
-                general_id: configInfoData.value.id,
-                version_id: newConfig.value.id,
+      function onPublishRollbackStopConfirm() {
+        const msg = props.publishType == 'publish' ? '发布' : '回滚'
+        naiveDailog.warning({
+          title: '提示',
+          content: `终止${msg}会标记${msg}失败，确认要终止${msg}？`,
+          positiveText: '确认',
+          negativeText: '再想想',
+          onPositiveClick: () => {
+            configInfoRef.value.$refs.userdefineRef.validate((valid: any) => {
+              if (valid) {
+                return
+              } else {
+                const action =
+                  props.publishType == 'publish' ? 'generalPublishStop' : 'generalRollbackStop'
+                loading.value = true
+                configRq(
+                  action,
+                  {},
+                  {
+                    general_id: configInfoData.value.id,
+                    version_id: newConfig.value.id,
+                  }
+                )
+                  .then(() => {
+                    message.success('终止成功')
+                    showModal.value = !showModal.value
+                    configInfoDataReset()
+                    emit('confirm')
+                  })
+                  .catch(() => {
+                    modalInitial()
+                  })
+                  .finally(() => {
+                    loading.value = false
+                  })
               }
-            )
-              .then(() => {
-                message.success('发布成功')
-                showModal.value = !showModal.value
-                configInfoDataReset()
-                emit('confirm')
-              })
-              .catch(() => {
-                modalInitial()
-              })
-              .finally(() => {
-                loading.value = false
-              })
-          }
+            })
+          },
+        })
+      }
+      function onPublishConfirm() {
+        naiveDailog.warning({
+          title: '提示',
+          content: '确认要发布？',
+          positiveText: '确认',
+          negativeText: '再想想',
+          onPositiveClick: () => {
+            configInfoRef.value.$refs.userdefineRef.validate((valid: any) => {
+              if (valid) {
+                return
+              } else {
+                loading.value = true
+                configRq(
+                  'generalPublish',
+                  {},
+                  {
+                    general_id: configInfoData.value.id,
+                    version_id: newConfig.value.id,
+                  }
+                )
+                  .then(() => {
+                    message.success('操作成功，正在发布')
+                    showModal.value = !showModal.value
+                    configInfoDataReset()
+                    emit('confirm')
+                  })
+                  .catch(() => {
+                    modalInitial()
+                  })
+                  .finally(() => {
+                    loading.value = false
+                  })
+              }
+            })
+          },
         })
       }
       function onRollbackConfirm() {
-        configInfoRef.value.$refs.userdefineRef.validate((valid: any) => {
-          if (valid) {
-            return
-          } else {
-            loading.value = true
-            configRq(
-              'generalRollback',
-              {},
-              {
-                general_id: configInfoData.value.id,
-                version_id: newConfig.value.id,
+        naiveDailog.warning({
+          title: '提示',
+          content: '确认要回滚？',
+          positiveText: '确认',
+          negativeText: '再想想',
+          onPositiveClick: () => {
+            configInfoRef.value.$refs.userdefineRef.validate((valid: any) => {
+              if (valid) {
+                return
+              } else {
+                loading.value = true
+                configRq(
+                  'generalRollback',
+                  {},
+                  {
+                    general_id: configInfoData.value.id,
+                    version_id: newConfig.value.id,
+                  }
+                )
+                  .then(() => {
+                    message.success('操作成功，正在回滚')
+                    showModal.value = !showModal.value
+                    configInfoDataReset()
+                    emit('confirm')
+                  })
+                  .catch(() => {
+                    modalInitial()
+                  })
+                  .finally(() => {
+                    loading.value = false
+                  })
               }
-            )
-              .then(() => {
-                message.success('回滚成功')
-                showModal.value = !showModal.value
-                configInfoDataReset()
-                emit('confirm')
-              })
-              .catch(() => {
-                modalInitial()
-              })
-              .finally(() => {
-                loading.value = false
-              })
-          }
+            })
+          },
         })
       }
       function onRetrieveConfirm() {
@@ -403,14 +480,18 @@
       function publishInitial(versionList: any) {
         const maybeNextVersion = versionList[0]
         if (versionList.length <= 1) {
-          oldConfig.value = { content: '' }
-          newConfig.value = versionList[0]
-        } else if (statusCheck.published(maybeNextVersion.status)) {
-          oldConfig.value = versionList[0]
+          oldConfig.value =
+            maybeNextVersion.status === 'modified' ? { content: '' } : versionList[0]
           newConfig.value = versionList[0]
         } else {
           oldConfig.value = versionList.find((item: any) => {
-            return ['published', 'rollbacked', 'rollback_failed'].includes(item.status)
+            return [
+              'published',
+              'rollbacked',
+              'rollback_failed',
+              'publishing',
+              'rollbacking',
+            ].includes(item.status)
           })
           newConfig.value = versionList[0]
         }
@@ -439,6 +520,12 @@
         })
       }
       const statusCheck = {
+        canPublishStop: (status: any) => {
+          return ['publishing'].includes(status) && props.publishType == 'publish'
+        },
+        canRollbackStop: (status: any) => {
+          return ['publishing'].includes(status) && props.publishType == 'rollback'
+        },
         canPublish: (status: any) => {
           return ['modified', 'publish_failed'].includes(status)
         },
@@ -497,6 +584,7 @@
         show,
         close,
         onPublishConfirm,
+        onPublishRollbackStopConfirm,
         onRollbackConfirm,
         onRetrieveConfirm,
         onCancel,

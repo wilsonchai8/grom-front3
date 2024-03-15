@@ -66,6 +66,7 @@ declare module 'vue' {
     NTimelineItem: typeof import('naive-ui')['NTimelineItem']
     NTooltip: typeof import('naive-ui')['NTooltip']
     NTree: typeof import('naive-ui')['NTree']
+    NWatermark: typeof import('naive-ui')['NWatermark']
     ScrollerMenu: typeof import('./src/components/sidebar/components/ScrollerMenu.vue')['default']
     Setting: typeof import('./src/components/setting/index.vue')['default']
     SideBar: typeof import('./src/components/sidebar/SideBar.vue')['default']
