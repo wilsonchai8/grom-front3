@@ -25,7 +25,12 @@
       :readonly="isRender"
       :value="isRender ? editorContentRender : editorContent"
     ></editor>
-    <n-tag v-if="isRender" style="margin-top: 5px" type="error">渲染模式，不能编辑</n-tag>
+    <n-space>
+      <n-tag style="margin-top: 5px" :type="versionIndex == 0 ? 'primary' : 'warning'">
+        <span>{{ versionIndex == 0 ? '当前版本' : '历史版本' }}</span>
+      </n-tag>
+      <n-tag v-if="isRender" style="margin-top: 5px" type="error">渲染模式，不能编辑</n-tag>
+    </n-space>
     <div v-if="!isAdd">
       <n-divider />
       <form-body
@@ -41,7 +46,7 @@
           <n-button type="default" size="small" @click="onCancel">取消</n-button>
           <n-button
             v-if="!isAdd"
-            :disabled="configInfoExtraData.status != 'modified'"
+            :disabled="configInfoExtraData.status != 'modified' || isRender"
             type="warning"
             size="small"
             @click="onAbandon"
@@ -53,7 +58,7 @@
             </n-button>
           </ComponentPermission>
           <n-button :disabled="isRender" type="primary" size="small" @click="onConfirm"
-            >确定</n-button
+            >保存</n-button
           >
         </n-space>
       </div>
@@ -64,7 +69,17 @@
 <script lang="ts">
   import globalStore from '@/store/modules/global'
   import editor from './components/editor.vue'
-  import { onMounted, computed, defineComponent, nextTick, ref, watchEffect, watch } from 'vue'
+  import {
+    onMounted,
+    computed,
+    defineComponent,
+    nextTick,
+    ref,
+    shallowRef,
+    watchEffect,
+    watch,
+    h,
+  } from 'vue'
   import { drag, unDrag } from '@/hooks/useDialogDragger'
   import { useMessage, NInput, NSelect, NTag, useDialog } from 'naive-ui'
   import configRq from '@/api/modules/1_config'
@@ -94,54 +109,54 @@
     setup(props, { emit }) {
       const useGlobal = globalStore()
       const isRender = ref(false) as any
+      const currentVersionNode = ref<HTMLElement | null>('')
       const message = useMessage()
       const configInfoRef = ref(null)
+      const configInfoExtraRef = ref(null)
       const showModal = ref(false)
       const header = ref<HTMLElement | null>()
       const naiveDailog = useDialog()
       const editorContent = ref('')
+      const versionIndex = ref(0)
       const editorContentRender = ref('')
       const editorRef = ref('')
       const segmented = {
         content: 'soft',
         footer: 'soft',
       }
-      const configInfoExtraColumn = computed(() => {
-        const isDisabled = props.isAdd
-        return [
-          {
-            label: '版本号',
-            key: 'name',
-            component: NSelect,
-            attribute: {
-              disabled: isDisabled,
-              style: 'width:180px',
-              options: configInfoExtraOptions.value,
-            },
-          },
-          {
-            label: '状态',
-            key: 'statusString',
-          },
-          {
-            label: '修改时间',
-            key: 'update_time',
-          },
-          {
-            label: '修改人',
-            key: 'modifier',
-          },
-          {
-            label: '发布时间',
-            key: 'publish_time',
-          },
-          {
-            label: '发布人',
-            key: 'publisher',
-          },
-        ]
-      })
       const configInfoExtraOptions = ref([])
+      const configInfoExtraColumn = shallowRef([
+        {
+          label: '版本号',
+          key: 'name',
+          component: NSelect,
+          attribute: {
+            id: 'version',
+            style: 'width:180px',
+            options: configInfoExtraOptions.value,
+          },
+        },
+        {
+          label: '状态',
+          key: 'statusString',
+        },
+        {
+          label: '修改时间',
+          key: 'update_time',
+        },
+        {
+          label: '修改人',
+          key: 'modifier',
+        },
+        {
+          label: '发布时间',
+          key: 'publish_time',
+        },
+        {
+          label: '发布人',
+          key: 'publisher',
+        },
+      ])
       const configInfoExtraData = ref({}) as any
       const configVersionList = ref([])
       const configInfoColumn = computed(() => {
@@ -153,7 +168,8 @@
             rule: {
               required: true,
               trigger: ['blur', 'input'],
-              message: '请输入',
+              message: '字符、数字、-_@组成，最多50个字符',
+              pattern: /^[A-Za-z0-9-_@.]{1,50}$/,
             },
             attribute: {
               disabled: isDisabled,
@@ -166,7 +182,8 @@
             rule: {
               required: true,
               trigger: ['blur', 'input'],
-              message: '请输入',
+              message: '字符、数字、-_@组成，最多50个字符',
+              pattern: /^[A-Za-z0-9-_@.]{1,50}$/,
             },
             attribute: {
               disabled: isDisabled,
@@ -218,38 +235,50 @@
         showModal.value = false
         return Promise.resolve(false)
       }
-      async function _updateGeneral() {
-        let res = null as any
-        return new Promise((resolve) => {
-          configInfoRef.value.$refs.userdefineRef.validate((valid) => {
-            if (valid) {
-              return resolve(res)
-            } else {
-              editorContent.value = editorRef.value.getContent()
-              const action = props.isAdd == true ? 'generalAdd' : 'generalUpdate'
-              const res = configRq(
-                action,
-                {},
-                {
-                  content: Base64.encode(editorContent.value),
-                  version_id: configInfoExtraData.value.id,
-                  ...configInfoData.value,
-                }
-              )
-              return resolve(res)
-            }
-          })
-        })
-      }
       async function onConfirm() {
-        const updateResponse = await _updateGeneral()
-        if (updateResponse) {
-          const msg = props.isAdd == true ? '配置文件添加成功' : '配置文件更新成功'
-          message.success(msg)
-          showModal.value = !showModal.value
-          configInfoDataReset()
-          emit('confirm')
+        const previous_content = editorContent.value
+        const current_content = editorRef.value.getContent()
+        if (!props.isAdd) {
+          if (previous_content === current_content) {
+            message.warning('文件内容没有变化')
+            return
+          }
         }
+        naiveDailog.warning({
+          title: '提示',
+          content: '确定要保存此次修改？',
+          positiveText: '保存',
+          negativeText: '再想想',
+          onPositiveClick: () => {
+            const msg = props.isAdd == true ? '配置文件添加成功' : '配置文件更新成功'
+            message.success(msg)
+            configInfoRef.value.$refs.userdefineRef
+              .validate((valid: any) => {
+                if (valid) {
+                  return
+                } else {
+                  const action = props.isAdd == true ? 'generalAdd' : 'generalUpdate'
+                  configRq(
+                    action,
+                    {},
+                    {
+                      content: Base64.encode(current_content),
+                      version_id: configInfoExtraData.value.id,
+                      ...configInfoData.value,
+                    }
+                  )
+                }
+              })
+              .then(() => {
+                editorContent.value = current_content
+                if (props.isAdd) {
+                  showModal.value = !showModal.value
+                  configInfoDataReset()
+                  emit('confirm')
+                }
+              })
+          },
+        })
       }
       function onCancel() {
         showModal.value = false
@@ -272,35 +301,34 @@
         })
       }
       async function _renderGeneral() {
-        const updateResponse = await _updateGeneral()
-        if (updateResponse) {
-          configRq(
-            'generalRender',
-            {},
-            {
-              id: props.generalInfo.id,
-              version_id: configInfoExtraData.value.id,
-            }
-          ).then(({ payload }) => {
-            editorContentRender.value = payload.content
-          })
-          isRender.value = !isRender.value
-        }
+        configRq(
+          'generalRender',
+          {},
+          {
+            id: props.generalInfo.id,
+            version_id: configInfoExtraData.value.id,
+          }
+        ).then(({ payload }) => {
+          editorContentRender.value = payload.content
+        })
+        isRender.value = !isRender.value
       }
       function onRender() {
+        const previousContent = editorContent.value
+        const currentContent = editorRef.value.getContent()
+        if (previousContent !== currentContent) {
+          message.warning('配置文件内容有改动，请先保存之后再渲染')
+          return
+        }
+        const column = _.cloneDeep(configInfoExtraColumn.value)
         if (!isRender.value) {
-          naiveDailog.warning({
-            title: '提示',
-            content: '渲染会默认保存当前修改，继续渲染？',
-            positiveText: '渲染',
-            negativeText: '再想想',
-            onPositiveClick: () => {
-              _renderGeneral()
-            },
-          })
+          column[0].attribute.disabled = true
+          _renderGeneral()
         } else {
+          column[0].attribute.disabled = false
           isRender.value = !isRender.value
         }
+        configInfoExtraColumn.value = column
       }
       watchEffect(() => {
         if (showModal.value) {
@@ -334,10 +362,6 @@
         configInfoExtraOptions.value = []
         configInfoRef.value.$refs.userdefineRef.restoreValidation()
       }
-      function configInfoEdit(configInfo: any) {
-        configInfoData.value = configInfo
-        editorContent.value = configInfo.content
-      }
       function modalInitial() {
         if (!props.isAdd) {
           const { id } = props.generalInfo
@@ -359,7 +383,8 @@
       }
       function updateCallback(data: any) {
         const configVersionListCopy = _.cloneDeep(configVersionList.value)
-        const target = configVersionListCopy.find((item: any) => {
+        const target = configVersionListCopy.find((item: any, index: any) => {
+          versionIndex.value = index
           return data.name == item.name
         }) as any
         configInfoExtraData.value = target
@@ -395,16 +420,17 @@
         editorContentRender,
         segmented,
         configInfoRef,
+        configInfoExtraRef,
         configInfoColumn,
         configInfoData,
         editorContent,
-        configInfoEdit,
         editorRef,
         modalInitial,
         configInfoExtraColumn,
         configInfoExtraData,
         updateCallback,
         isRender,
+        versionIndex,
       }
     },
   })
