@@ -105,7 +105,8 @@
             rule: {
               required: true,
               trigger: ['blur', 'input'],
-              message: 'key',
+              message: '字符、数字、-_@.组成，最多100个字符',
+pattern: /^[A-Za-z0-9-_@=.]{1,100}$/,
             },
             attribute: {
               disabled: !props.isAdd,
