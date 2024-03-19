@@ -307,13 +307,13 @@
         isRender.value = !isRender.value
       }
       function onRender() {
-        const previousContent = editorContent.value
-        const currentContent = editorRef.value.getContent()
-        if (previousContent !== currentContent) {
-          message.warning('配置文件内容有改动，请先保存之后再渲染')
-          return
-        }
         if (!isRender.value) {
+          const previousContent = editorContent.value
+          const currentContent = editorRef.value.getContent()
+          if (previousContent !== currentContent) {
+            message.warning('配置文件内容有改动，请先保存之后再渲染')
+            return
+          }
           _renderGeneral()
         } else {
           isRender.value = !isRender.value
