@@ -26,8 +26,8 @@
       :value="isRender ? editorContentRender : editorContent"
     ></editor>
     <n-space>
-      <n-tag style="margin-top: 5px" :type="versionIndex == 0 ? 'primary' : 'warning'">
-        <span>{{ versionIndex == 0 ? '当前版本' : '历史版本' }}</span>
+      <n-tag style="margin-top: 5px" :type="currentVersion.type">
+        <span>{{ currentVersion.text }}</span>
       </n-tag>
       <n-tag v-if="isRender" style="margin-top: 5px" type="error">渲染模式，不能编辑</n-tag>
     </n-space>
@@ -35,7 +35,7 @@
       <n-divider />
       <form-body
         ref="configInfoExtraRef"
-        :userdefineColumn="configInfoExtraColumn"
+        :userdefineColumn="configInfoExtraColumn()"
         :userdefineData="configInfoExtraData"
         @onUpdate="updateCallback"
       />
@@ -69,17 +69,7 @@
 <script lang="ts">
   import globalStore from '@/store/modules/global'
   import editor from './components/editor.vue'
-  import {
-    onMounted,
-    computed,
-    defineComponent,
-    nextTick,
-    ref,
-    shallowRef,
-    watchEffect,
-    watch,
-    h,
-  } from 'vue'
+  import { onMounted, computed, defineComponent, nextTick, ref, watchEffect, watch } from 'vue'
   import { drag, unDrag } from '@/hooks/useDialogDragger'
   import { useMessage, NInput, NSelect, NTag, useDialog } from 'naive-ui'
   import configRq from '@/api/modules/1_config'
@@ -109,7 +99,6 @@
     setup(props, { emit }) {
       const useGlobal = globalStore()
       const isRender = ref(false) as any
-      const currentVersionNode = ref<HTMLElement | null>('')
       const message = useMessage()
       const configInfoRef = ref(null)
       const configInfoExtraRef = ref(null)
@@ -117,7 +106,10 @@
       const header = ref<HTMLElement | null>()
       const naiveDailog = useDialog()
       const editorContent = ref('')
-      const versionIndex = ref(0)
+      const currentVersion = ref({
+        type: '',
+        text: '',
+      })
       const editorContentRender = ref('')
       const editorRef = ref('')
       const segmented = {
@@ -125,38 +117,41 @@
         footer: 'soft',
       }
       const configInfoExtraOptions = ref([])
-      const configInfoExtraColumn = shallowRef([
-        {
-          label: '版本号',
-          key: 'name',
-          component: NSelect,
-          attribute: {
-            id: 'version',
-            style: 'width:180px',
-            options: configInfoExtraOptions.value,
+      function configInfoExtraColumn() {
+        return [
+          {
+            label: '版本号',
+            key: 'name',
+            component: NSelect,
+            attribute: {
+              id: 'version',
+              style: 'width:180px',
+              options: configInfoExtraOptions.value,
+              disabled: isRender.value,
+            },
           },
-        },
-        {
-          label: '状态',
-          key: 'statusString',
-        },
-        {
-          label: '修改时间',
-          key: 'update_time',
-        },
-        {
-          label: '修改人',
-          key: 'modifier',
-        },
-        {
-          label: '发布时间',
-          key: 'publish_time',
-        },
-        {
-          label: '发布人',
-          key: 'publisher',
-        },
-      ])
+          {
+            label: '状态',
+            key: 'statusString',
+          },
+          {
+            label: '修改时间',
+            key: 'update_time',
+          },
+          {
+            label: '修改人',
+            key: 'modifier',
+          },
+          {
+            label: '发布时间',
+            key: 'publish_time',
+          },
+          {
+            label: '发布人',
+            key: 'publisher',
+          },
+        ]
+      }
       const configInfoExtraData = ref({}) as any
       const configVersionList = ref([])
       const configInfoColumn = computed(() => {
@@ -251,32 +246,30 @@
           negativeText: '再想想',
           onPositiveClick: () => {
             const msg = props.isAdd == true ? '配置文件添加成功' : '配置文件更新成功'
-            message.success(msg)
-            configInfoRef.value.$refs.userdefineRef
-              .validate((valid: any) => {
-                if (valid) {
-                  return
-                } else {
-                  const action = props.isAdd == true ? 'generalAdd' : 'generalUpdate'
-                  configRq(
-                    action,
-                    {},
-                    {
-                      content: Base64.encode(current_content),
-                      version_id: configInfoExtraData.value.id,
-                      ...configInfoData.value,
-                    }
-                  )
-                }
-              })
-              .then(() => {
-                editorContent.value = current_content
-                if (props.isAdd) {
-                  showModal.value = !showModal.value
-                  configInfoDataReset()
-                  emit('confirm')
-                }
-              })
+            configInfoRef.value.$refs.userdefineRef.validate((valid: any) => {
+              if (valid) {
+                return
+              } else {
+                const action = props.isAdd == true ? 'generalAdd' : 'generalUpdate'
+                configRq(
+                  action,
+                  {},
+                  {
+                    content: Base64.encode(current_content),
+                    version_id: configInfoExtraData.value.id,
+                    ...configInfoData.value,
+                  }
+                ).then(() => {
+                  message.success(msg)
+                  editorContent.value = current_content
+                  if (props.isAdd) {
+                    showModal.value = !showModal.value
+                    configInfoDataReset()
+                    emit('confirm')
+                  }
+                })
+              }
+            })
           },
         })
       }
@@ -320,15 +313,11 @@
           message.warning('配置文件内容有改动，请先保存之后再渲染')
           return
         }
-        const column = _.cloneDeep(configInfoExtraColumn.value)
         if (!isRender.value) {
-          column[0].attribute.disabled = true
           _renderGeneral()
         } else {
-          column[0].attribute.disabled = false
           isRender.value = !isRender.value
         }
-        configInfoExtraColumn.value = column
       }
       watchEffect(() => {
         if (showModal.value) {
@@ -359,6 +348,7 @@
         isRender.value = false
         editorContentRender.value = ''
         editorContent.value = ''
+        currentVersion.value = { type: '', text: '' }
         configInfoExtraOptions.value = []
         configInfoRef.value.$refs.userdefineRef.restoreValidation()
       }
@@ -378,19 +368,20 @@
             configInfoExtraData.value.statusString =
               useGlobal.general_status[configInfoExtraData.value.status]
             editorContent.value = configInfoExtraData.value.content
+            getCurrentVersionPublished()
           })
         }
       }
       function updateCallback(data: any) {
         const configVersionListCopy = _.cloneDeep(configVersionList.value)
-        const target = configVersionListCopy.find((item: any, index: any) => {
-          versionIndex.value = index
+        const target = configVersionListCopy.find((item: any) => {
           return data.name == item.name
         }) as any
         configInfoExtraData.value = target
         configInfoExtraData.value.statusString =
           useGlobal.general_status[configInfoExtraData.value.status]
         editorContent.value = target.content
+        getCurrentVersionPublished()
       }
       watch(
         () => configInfoData.value.env_id,
@@ -407,6 +398,22 @@
           }
         }
       )
+      function getCurrentVersionPublished() {
+        const onlineVersion = configVersionList.value.find((item: any, index: any) => {
+          return item.is_publish
+        })
+        if (configInfoExtraData.value.is_publish === 0) {
+          currentVersion.value.type = 'primary'
+          currentVersion.value.text = '未发布版本'
+        } else if (onlineVersion && onlineVersion.id === configInfoExtraData.value.id) {
+          currentVersion.value.type = 'success'
+          currentVersion.value.text = '线上版本'
+        } else {
+          currentVersion.value.type = 'warning'
+          currentVersion.value.text = '历史版本'
+        }
+      }
+
       onMounted(() => {})
       return {
         showModal,
@@ -430,7 +437,7 @@
         configInfoExtraData,
         updateCallback,
         isRender,
-        versionIndex,
+        currentVersion,
       }
     },
   })
