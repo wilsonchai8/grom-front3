@@ -42,8 +42,22 @@
         <n-space>
           <n-button type="default" size="small" @click="onCancel">取消</n-button>
           <n-button v-if="!isPublish" type="primary" size="small" @click="onConfirm">确定</n-button>
-          <n-button v-if="isPublish" :disabled="publicInfoExtraData.status != 'modified'" type="success" size="small" @click="onPublish">发布</n-button>
-          <n-button v-if="isPublish" :disabled="publicInfoExtraData.status != 'published'" type="warning" size="small" @click="onRollback">回滚</n-button>
+          <n-button
+            v-if="isPublish"
+            :disabled="publicInfoExtraData.status != 'modified'"
+            type="success"
+            size="small"
+            @click="onPublish"
+            >发布</n-button
+          >
+          <n-button
+            v-if="isPublish"
+            :disabled="publicInfoExtraData.status != 'published'"
+            type="warning"
+            size="small"
+            @click="onRollback"
+            >回滚</n-button
+          >
         </n-space>
       </div>
     </template>
@@ -106,7 +120,7 @@
               required: true,
               trigger: ['blur', 'input'],
               message: '字符、数字、-_@.组成，最多100个字符',
-pattern: /^[A-Za-z0-9-_@=.]{1,100}$/,
+              pattern: /^[A-Za-z0-9-_@=.]{1,100}$/,
             },
             attribute: {
               disabled: !props.isAdd,
@@ -330,7 +344,8 @@ pattern: /^[A-Za-z0-9-_@=.]{1,100}$/,
           return data.name == item.name
         }) as any
         publicInfoExtraData.value = target
-        publicInfoExtraData.value.statusString = useGlobal.general_status[publicInfoExtraData.value.status]
+        publicInfoExtraData.value.statusString =
+          useGlobal.general_status[publicInfoExtraData.value.status]
         publicPayloadData.value.value = target.v
       }
       watch(
