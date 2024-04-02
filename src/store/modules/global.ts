@@ -3,6 +3,7 @@ import userRq from '@/api/modules/4_user'
 import roleRq from '@/api/modules/5_role'
 import envRq from '@/api/modules/3_env'
 import configRq from '@/api/modules/1_config'
+import tokenRq from '@/api/modules/6_token'
 
 const globalStore = defineStore('global-info', {
     state: () => {
@@ -13,6 +14,7 @@ const globalStore = defineStore('global-info', {
             role_list: [] as any,
             env_counts: 0 as Number,
             env_list: [] as any,
+            token_list: [] as any,
             general_status: [] as any,
         }
     },
@@ -33,6 +35,16 @@ const globalStore = defineStore('global-info', {
                 ret.push({
                     label: item.rolename,
                     value: item.id,
+                })
+            })
+            return ret
+        },
+        tokenListSelect(state) {
+            const ret = [] as any
+            state.token_list.forEach((item: any) => {
+                ret.push({
+                    label: item.tokenname,
+                    value: item.payload,
                 })
             })
             return ret
@@ -77,6 +89,14 @@ const globalStore = defineStore('global-info', {
                 })
             })
         },
+        initTokenList() {
+            return new Promise<void>((resolve) => {
+                tokenRq('tokenList', {}, {}).then(({ payload }) => {
+                    this.token_list = payload.token_list
+                    resolve(payload)
+                })
+            })
+        },
         initGeneralStatus() {
             return new Promise<void>((resolve) => {
                 configRq('generalStatus', {}, {}).then(({ payload }) => {
@@ -89,6 +109,7 @@ const globalStore = defineStore('global-info', {
             this.initUserList()
             this.initRoleList()
             this.initEnvList()
+            this.initTokenList()
             this.initGeneralStatus()
         },
     },

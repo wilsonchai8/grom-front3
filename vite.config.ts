@@ -43,7 +43,7 @@ export default () => {
       open: true,
       proxy: {
         '/api': {
-          target: 'http://test.grom-devops.com:9999',
+          target: 'http://www.grom-devops.com:9999',
           changeOrigin: true,
         },
       },

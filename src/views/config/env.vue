@@ -58,11 +58,13 @@
     TableActionModel,
   } from '@/hooks/table'
   import { DataFormType, ModalDialogType } from '@/types/components'
-  import { DataTableColumn, NInput, NSwitch, useDialog, FormItemRule } from 'naive-ui'
-  import { defineComponent, onMounted, ref, nextTick, computed } from 'vue'
+  import { DataTableColumn, NInput, NSelect, NSwitch, useDialog, FormItemRule } from 'naive-ui'
+  import { defineComponent, onMounted, ref, nextTick, computed, watch } from 'vue'
+  import globalStore from '@/store/modules/global'
   export default defineComponent({
     name: 'EnvList',
     setup() {
+      const useGlobal = globalStore()
       const envlist = ref([])
       const envInfoRef = ref(null)
       const searchForm = ref<DataFormType | null>(null)
@@ -130,7 +132,11 @@
           {
             label: '回调token',
             key: 'callback_token',
-            component: NInput,
+            component: NSelect,
+            attribute: {
+              style: 'width:180px',
+              options: useGlobal.tokenListSelect,
+            },
           },
         ]
       })
@@ -139,6 +145,7 @@
         prefix: '',
         notification: '',
         notification_token: '',
+        callback_token_name: '',
         callback_token: '',
         is_callback: false,
       })
@@ -175,7 +182,7 @@
           },
           {
             title: '回调token',
-            key: 'callback_token',
+            key: 'callback_token_name',
           },
           {
             title: '修改人',
@@ -303,10 +310,22 @@
           prefix: '',
           notification: '',
           notification_token: '',
+          callback_token_name: '',
           callback_token: '',
           is_callback: false,
         }
       }
+      watch(
+        () => envInfoData.value.callback_token,
+        (newVal) => {
+          const targetToken = useGlobal.tokenListSelect.find((item: any) => {
+            return item.value == newVal
+          })
+          if (targetToken) {
+            envInfoData.value.callback_token_name = targetToken.label
+          }
+        }
+      )
       return {
         ...table,
         rowKey,
