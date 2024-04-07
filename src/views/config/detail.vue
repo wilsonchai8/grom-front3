@@ -370,6 +370,8 @@
             editorContent.value = configInfoExtraData.value.content
             getCurrentVersionPublished()
           })
+        } else {
+          editorContent.value = null
         }
       }
       function updateCallback(data: any) {
